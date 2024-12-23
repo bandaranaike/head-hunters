@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vacancy;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\JsonResponse;
 
 class ReportController extends Controller
 {
+
+    use RefreshDatabase;
+
     public function moneyInPipeline(): JsonResponse
     {
         $vacancies = Vacancy::with(['applications', 'currency'])
