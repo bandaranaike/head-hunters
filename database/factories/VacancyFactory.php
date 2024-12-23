@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\Currency;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,7 +24,7 @@ class VacancyFactory extends Factory
             'role_id' => Role::factory(),
             'positions' => $this->faker->numberBetween(1, 10),
             'remuneration' => $this->faker->numberBetween(50000, 150000),
-            'currency_code' => $this->faker->currencyCode,
+            'currency_id' => $this->faker->numberBetween(1, Currency::count()),
             'description' => $this->faker->paragraph,
             'status' => $this->faker->randomElement(['open', 'closed', 'paused']),
             'created_at' => now(),
