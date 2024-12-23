@@ -16,6 +16,9 @@ class MoneyInPipelineTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @throws Exception
+     */
     public function test_money_in_pipeline_calculation()
     {
 
@@ -26,7 +29,7 @@ class MoneyInPipelineTest extends TestCase
             // Fetch two existing currencies
             $currencyUSD = Currency::where('currency_code', 'USD')->firstOrFail();
             $currencyEUR = Currency::where('currency_code', 'EUR')->firstOrFail();
-        } catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException) {
             // Update currencies if none are found
             $currencyService = app(CurrencyService::class);
             $currencyService->updateCurrenciesIfStale();
@@ -34,8 +37,6 @@ class MoneyInPipelineTest extends TestCase
             // Retry fetching the currencies
             $currencyUSD = Currency::where('currency_code', 'USD')->firstOrFail();
             $currencyEUR = Currency::where('currency_code', 'EUR')->firstOrFail();
-        } catch (Exception $e) {
-            $this->expectException(ModelNotFoundException::class);
         }
 
         // Create two vacancies with different currencies
@@ -65,7 +66,6 @@ class MoneyInPipelineTest extends TestCase
             'vacancy_id' => $vacancy2->id,
             'asking_remuneration' => 4000, // EUR
         ]);
-
 
         // Call the pipeline report endpoint
         $response = $this->getJson('/api/pipeline-report');

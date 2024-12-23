@@ -6,12 +6,11 @@ use App\Models\Currency;
 use App\Services\Clients\CurrencyApiClient;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Http;
 
 class CurrencyService
 {
 
-    protected $apiClient;
+    protected CurrencyApiClient $apiClient;
 
     public function __construct(CurrencyApiClient $apiClient)
     {
@@ -26,9 +25,9 @@ class CurrencyService
     {
         $lastUpdate = Currency::max('last_updated');
 
-        // Check if the last update was more than 5 minutes ago
-        if ($lastUpdate && Carbon::parse($lastUpdate)->diffInMinutes(now()) < 5) {
-            return; // Data is fresh, no need to update
+        // Check if records are updated or not
+        if ($lastUpdate && Carbon::parse($lastUpdate)->diffInSeconds(now()) < Currency::CURRENCY_LIST_UPDATE_FREQUENCY_IN_SECONDS) {
+            return; // Has updated. No need to update
         }
 
         $currencies = $this->apiClient->getCurrencies();
