@@ -1,0 +1,7 @@
+clients(id, name, email, phone, created_at, updated_at)
+roles(id, name, description, created_at, updated_at)
+vacancies(id, client_id, role_id, positions, remuneration, currency_code, description, status, created_at, updated_at)
+applications(id, vacancy_id, email, phone, asking_remuneration, cv_file_path, status, created_at, updated_at)
+commissions(id, client_id, vacancy_id, total_commission_usd, calculated_at)
+currencies(id, currency_code, currency_name, rate_to_usd, last_updated)
+invoices(id, client_id, total_amount, invoice_date, created_at, updated_at)
