@@ -52,7 +52,7 @@ class MoneyInPipelineTest extends TestCase
 
 
         // Call the pipeline report endpoint
-        $response = $this->getJson('/pipeline-report');
+        $response = $this->getJson('/api/pipeline-report');
 
         // Calculate the expected pipeline commission
         // Vacancy 1: 3 positions * avg(5000) * 10% * rate_to_usd (1)
