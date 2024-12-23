@@ -10,6 +10,7 @@ use App\Services\CurrencyService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class MoneyInPipelineTest extends TestCase
@@ -68,7 +69,7 @@ class MoneyInPipelineTest extends TestCase
         ]);
 
         // Call the pipeline report endpoint
-        $response = $this->getJson('/api/pipeline-report');
+        $response = $this->getJson('/api/report/money-in-pipeline');
 
         // Calculate the expected pipeline commission
         // Vacancy 1: 3 positions * avg(5000) * 10% * rate_to_usd (1)
@@ -91,5 +92,27 @@ class MoneyInPipelineTest extends TestCase
             $response->json('total_pipeline_commission_usd'),
             'Pipeline commission calculation mismatch.'
         );
+    }
+
+
+    public function test_currency_service_failure()
+    {
+        $mockCurrencyService = Mockery::mock(CurrencyService::class);
+        $mockCurrencyService->shouldReceive('updateCurrenciesIfStale')
+            ->andThrow(new \Exception('Currency update failed.'));
+        $this->app->instance(CurrencyService::class, $mockCurrencyService);
+
+        $response = $this->getJson('/api/report/money-in-pipeline');
+
+        $response->assertStatus(500)
+            ->assertJson(['error' => 'Currency update failed.']);
+    }
+
+    public function test_no_open_vacancies()
+    {
+        $response = $this->getJson('/api/report/money-in-pipeline');
+
+        $response->assertOk()
+            ->assertJson(['total_pipeline_commission_usd' => 0]);
     }
 }

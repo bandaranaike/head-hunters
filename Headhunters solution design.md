@@ -26,7 +26,7 @@ The proposed solution for Head-Hunter Inc. software system. It will consist of t
 ### Architecture
 - **Design Pattern**: Microservices Architecture with separation of concerns.
 - **Tech Stack**:
-  - Backend: Laravel (PHP).
+  - Backend: Laravel (PHP) or Node.js (Express).
   - Database: MySQL.
   - Frontend: React.js (Next.js) or Vue.js.
   - Deployment: Dockerized environment (with CI/CD pipelines).
@@ -163,19 +163,19 @@ Total Commission (USD) = Positions * AVG(Asking Remuneration) * 0.1 * Rate to US
 ```php
 public function calculatePipelineCommission()
 {
-    $vacancies = DB::table('vacancies as v')
-        ->join('applications as a', 'v.id', '=', 'a.vacancy_id')
-        ->join('currencies as c', 'v.currency_code', '=', 'c.currency_code')
-        ->select('v.id', 'v.positions', DB::raw('AVG(a.asking_remuneration) as avg_remuneration'), 'c.rate_to_usd')
-        ->where('v.status', 'open')
-        ->groupBy('v.id')
-        ->get();
+        $vacancies = Vacancy::with(['applications', 'currency'])
+            ->where('status', 'open')
+            ->get();
 
-    $pipeline = $vacancies->map(function ($vacancy) {
-        return $vacancy->positions * $vacancy->avg_remuneration * 0.1 * $vacancy->rate_to_usd;
-    });
+        $pipeline = $vacancies->map(function ($vacancy) {
+            $averageRemuneration = $vacancy->applications->avg('asking_remuneration');
+            return $vacancy->positions * $averageRemuneration * 0.1 * $vacancy->currency->rate_to_usd;
+        });
 
-    return response()->json(['total_pipeline_commission_usd' => $pipeline->sum()]);
+        $totalPipeline = $pipeline->sum();
+        
+        
+        return response()->json(['total_pipeline_commission_usd' => $totalPipeline]);
 }
 ```
 

@@ -1,66 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Head-Hunters API - Money in Pipeline Report
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
+This project is a Laravel 11 API designed to calculate and report the total pipeline commission in USD for Head-Hunters' recruitment business. It runs within a Dockerized environment for consistency and ease of deployment.
 
-## About Laravel
+## Key Features
+- **API Endpoint**: Calculates the total pipeline commission.
+- **Database-Driven**: Utilizes a relational database with preloaded currency data (680 currencies).
+- **Eloquent Relationships**: Simplifies data handling using Laravel's ORM.
+- **Docker Support**: Ensures a consistent development and production environment.
+- **Automated Testing**: Validates functionality using Laravel's testing suite.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Getting Started
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Prerequisites
+1. **Docker**: Ensure Docker is installed on your machine.
+2. **Git**: Install Git to clone the repository.
+3. **Composer**: Required for managing Laravel dependencies.
+4. **Postman or Curl**: For API testing (optional).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Installation
+1. Clone the project repository:
+   ```bash
+   git clone https://github.com/bandaranaike/head-hunters.git
+   cd head-hunters
+   ```
 
-## Learning Laravel
+2. Start Docker containers:
+   ```bash
+   docker-compose up -d
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. Install Laravel dependencies:
+   ```bash
+   docker-compose exec app composer install
+   ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. Set up the `.env` file:
+    - Copy the example file:
+      ```bash
+      cp .env.example .env
+      ```
+    - Update the database and application configurations as needed.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+5. Run migrations to set up the database:
+   ```bash
+   docker-compose exec app php artisan migrate
+   ```
 
-## Laravel Sponsors
+6. Seed the database (ensure 680 currencies are preloaded):
+   ```bash
+   docker-compose exec app php artisan db:seed
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### API Endpoint
+- **Endpoint**: `http://localhost/api/report/money-in-pipeline`
+- **Method**: `GET`
+- **Expected Output**:
+  ```json
+  {
+    "total_pipeline_commission_usd": 0
+  }
+  ```
 
-### Premium Partners
+### Running the Application
+1. Ensure Docker containers are running:
+   ```bash
+   docker-compose up -d
+   ```
+2. Access the API endpoint:
+    - Using Postman or Curl:
+      ```bash
+      curl http://localhost/api/report/money-in-pipeline
+      ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Running Tests
+1. Execute all tests:
+   ```bash
+   docker-compose exec app php artisan test
+   ```
 
-## Contributing
+### Test Details
+- The test for the Money in Pipeline Report ensures:
+    - Accurate calculation of pipeline commission in USD.
+    - Proper integration of preloaded currency data.
+    - Validation of business logic with real and mock data.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Key Files
+- **Controller**: `app/Http/Controllers/ReportController.php`
+- **Test**: `tests/Feature/MoneyInPipelineTest.php`
+- **Models**: Located in `app/Models`.
+- **Docker Configuration**: `docker-compose.yml`
+- **Migrations**: Located in `database/migrations`.
 
-## Code of Conduct
+## Support
+For issues or questions, feel free to raise a GitHub issue or contact the repository maintainer.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+### Quick Start Summary
+1. Clone the repo.
+2. Run `docker-compose up -d`.
+3. Run migrations and seed the database.
+4. Access `http://localhost/api/report/money-in-pipeline` to fetch the pipeline report.
+5. Test the functionality with `php artisan test`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Enjoy building with Head-Hunters API!
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
