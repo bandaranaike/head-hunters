@@ -3,16 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vacancy;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Services\CurrencyService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 class ReportController extends Controller
 {
 
-    use RefreshDatabase;
+    protected CurrencyService $currencyService;
+
+    public function __construct(CurrencyService $currencyService)
+    {
+        $this->currencyService = $currencyService;
+    }
 
     public function moneyInPipeline(): JsonResponse
     {
+        try {
+            $this->currencyService->updateCurrenciesIfStale();
+        } catch (Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+
         $vacancies = Vacancy::with(['applications', 'currency'])
             ->where('status', 'open')
             ->get();

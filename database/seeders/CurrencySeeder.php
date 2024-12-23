@@ -21,7 +21,7 @@ class CurrencySeeder extends Seeder
     public function run(): void
     {
         try {
-            $this->currencyService->fetchAndUpdateCurrencies();
+            $this->currencyService->updateCurrenciesIfStale();
             $this->command->info('Currencies and rates have been successfully updated.');
         } catch (Exception $e) {
             $this->command->error($e->getMessage());

@@ -6,21 +6,37 @@ use App\Models\Application;
 use App\Models\Client;
 use App\Models\Currency;
 use App\Models\Vacancy;
+use App\Services\CurrencyService;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MoneyInPipelineTest extends TestCase
 {
+    use RefreshDatabase;
 
     public function test_money_in_pipeline_calculation()
     {
 
-
         // Create a client
         $client = Client::factory()->create();
 
-        // Fetch two existing currencies
-        $currencyUSD = Currency::where('currency_code', 'USD')->firstOrFail();
-        $currencyEUR = Currency::where('currency_code', 'EUR')->firstOrFail();
+        try {
+            // Fetch two existing currencies
+            $currencyUSD = Currency::where('currency_code', 'USD')->firstOrFail();
+            $currencyEUR = Currency::where('currency_code', 'EUR')->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            // Update currencies if none are found
+            $currencyService = app(CurrencyService::class);
+            $currencyService->updateCurrenciesIfStale();
+
+            // Retry fetching the currencies
+            $currencyUSD = Currency::where('currency_code', 'USD')->firstOrFail();
+            $currencyEUR = Currency::where('currency_code', 'EUR')->firstOrFail();
+        } catch (Exception $e) {
+            $this->expectException(ModelNotFoundException::class);
+        }
 
         // Create two vacancies with different currencies
         $vacancy1 = Vacancy::factory()->create([

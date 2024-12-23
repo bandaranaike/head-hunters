@@ -3,29 +3,38 @@
 namespace App\Services;
 
 use App\Models\Currency;
+use App\Services\Clients\CurrencyApiClient;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Http;
 
 class CurrencyService
 {
+
+    protected $apiClient;
+
+    public function __construct(CurrencyApiClient $apiClient)
+    {
+        $this->apiClient = $apiClient;
+    }
+
     /**
-     * Fetch and update currencies and rates.
+     * Fetch and update currencies if older than 5 minutes.
+     * @throws Exception
      */
-    public function fetchAndUpdateCurrencies(): void
+    public function updateCurrenciesIfStale(): void
     {
         $lastUpdate = Currency::max('last_updated');
 
-        // Check if records are updated or not
-        if ($lastUpdate && Carbon::parse($lastUpdate)->diffInSeconds(now()) < Currency::CURRENCY_LIST_UPDATE_FREQUENCY_IN_SECONDS) {
-            return; // Has updated. No need to update
+        // Check if the last update was more than 5 minutes ago
+        if ($lastUpdate && Carbon::parse($lastUpdate)->diffInMinutes(now()) < 5) {
+            return; // Data is fresh, no need to update
         }
 
-        $currenciesResponse = Http::get('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.json');
-        $ratesResponse = Http::get('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+        $currencies = $this->apiClient->getCurrencies();
+        $rates = $this->apiClient->getRates();
 
-        if ($currenciesResponse->ok() && $ratesResponse->ok()) {
-            $currencies = $currenciesResponse->json();
-            $rates = $ratesResponse->json();
+        if ($currencies && $rates) {
             $rateToUsd = $rates['usd'] ?? [];
 
             $dataToInsert = [];
@@ -40,7 +49,7 @@ class CurrencyService
 
             Currency::upsert($dataToInsert, ['currency_code'], ['currency_name', 'rate_to_usd', 'last_updated']);
         } else {
-            throw new \Exception('Failed to fetch currencies or rates from API.');
+            throw new Exception('Failed to fetch currencies or rates from API.');
         }
     }
 }
